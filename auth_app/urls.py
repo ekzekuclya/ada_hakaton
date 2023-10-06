@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView, TokenRefreshView
 )
 
+
 router = routers.DefaultRouter()
 router.register('user', UserProfileViewSet, basename='user')
 router.register('notification', NotificationViewSet, basename='notification')
