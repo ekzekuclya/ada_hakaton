@@ -1,4 +1,4 @@
-from .models import CustomUser as User, UserProfile, Notifications
+from .models import CustomUser as User, UserProfile, Notifications, UserPublication
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -10,7 +10,6 @@ class RegUserSerializer(serializers.ModelSerializer):
     )
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True)
-
 
     class Meta:
         model = User
@@ -53,21 +52,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
     fields = ['username']
 
 
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     user = serializers.CharField(source='user.username')
-#     followers = serializers.SerializerMethodField()
-#     following = serializers.SerializerMethodField()
-#
-#     def get_followers(self, obj):
-#         return UserSerializer(obj.followers.all(), many=True).data
-#
-#     def get_following(self, obj):
-#         return UserSerializer(obj.following.all(), many=True).data
-#
-#     class Meta:
-#         model = UserProfile
-#         fields = ['user', 'followers', 'following']
-
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
     followers = serializers.SerializerMethodField()
@@ -90,3 +74,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = ['id', 'content']
 
 
+class UserPublicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPublication
+        fields = ['event', 'user_profile']

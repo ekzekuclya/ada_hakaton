@@ -3,8 +3,9 @@ from rest_framework.authtoken.models import Token
 from django.utils import timezone
 from django_filters import exceptions
 from rest_framework import generics, response, status, exceptions, viewsets
-from .models import CustomUser as User, UserProfile, Notifications
-from .serializers import RegUserSerializer, LoginSerializer, UserProfileSerializer, NotificationSerializer
+from .models import CustomUser as User, UserProfile, Notifications, UserPublication
+from .serializers import (RegUserSerializer, LoginSerializer,
+                          UserProfileSerializer, NotificationSerializer, UserPublicationSerializer)
 from rest_framework.permissions import AllowAny
 from .permissions import UserProfilePermission, NotificationPermission
 from rest_framework.decorators import action
@@ -131,6 +132,21 @@ class NotificationViewSet(viewsets.ModelViewSet):
         user = self.request.user
         notifications = Notifications.objects.filter(user=user)
         return notifications
+
+
+class UserPublicationView(viewsets.ModelViewSet):
+    serializer_class = UserPublicationSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        userprofile_pk = self.kwargs.get('userprofile_pk')
+        if userprofile_pk:
+            return UserPublication.objects.filter(user_profile_id=userprofile_pk)
+        else:
+            return response.Response({"detail": "Не найден профиль"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
 
 
 

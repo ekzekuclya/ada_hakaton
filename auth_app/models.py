@@ -24,3 +24,20 @@ class Notifications(models.Model):
 class AnonymousUser(models.Model):
     ip_address = models.GenericIPAddressField()
     session_key = models.CharField(max_length=255, unique=True)
+
+
+class Tag(models.Model):
+    hashtag = models.CharField(max_length=255)
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    publication = models.ForeignKey('UserPublication', on_delete=models.CASCADE, null=True, blank=True)
+
+
+class UserPublication(models.Model):
+    event = models.ForeignKey(haka_app.Event, on_delete=models.CASCADE, null=True, blank=True)
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    description = models.CharField(max_length=255)
+    tags = models.ManyToManyField(Tag, blank=True)
+

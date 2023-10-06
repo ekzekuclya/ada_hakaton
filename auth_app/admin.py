@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, CustomUser, Notifications, AnonymousUser
+from .models import UserProfile, CustomUser, Notifications, AnonymousUser, UserPublication
 
 
 @admin.register(UserProfile)
@@ -20,3 +20,8 @@ class NotificationAdmin(admin.ModelAdmin):
 @admin.register(AnonymousUser)
 class AnonymousUser(admin.ModelAdmin):
     list_display = ['ip_address']
+
+
+@admin.register(UserPublication)
+class PublicationAdmin(admin.ModelAdmin):
+    list_display = ['user_profile']

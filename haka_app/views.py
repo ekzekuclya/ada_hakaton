@@ -1,14 +1,12 @@
-from rest_framework import viewsets
 from .models import Event
-from .serializers import EventSerializer
-from rest_framework.decorators import action
-from rest_framework import viewsets, filters, response, status
-from django_filters import rest_framework as django_filters
+from .serializers import EventSerializer, MixedScrollList
+from rest_framework import viewsets, filters, response, status, generics
 from rest_framework.decorators import action
 from .permissions import DefaultPermission
-from auth_app import models as auth_md
+from auth_app import models as auth_md, serializers as auth_sz
 from .utils import get_client_ip
-from django.contrib.sessions.models import Session
+from random import shuffle
+from rest_framework.views import APIView
 
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -61,10 +59,35 @@ class EventViewSet(viewsets.ModelViewSet):
                                      status=status.HTTP_400_BAD_REQUEST)
 
 
+# class MixedFeedView(viewsets.ModelViewSet):
+#     serializer_class = MixedScrollList
+#     permission_classes = [DefaultPermission]
+#
+#     def get_queryset(self):
+#         events = Event.objects.all()
+#         user_publications = auth_md.UserPublication.objects.all()
+#         mixed_feed = {
+#             'user_publication': user_publications,
+#             'events': events,
+#         }
+#         return mixed_feed
 
 
+class MixedFeedView(APIView):
+    permission_classes = [DefaultPermission]
 
+    def get(self, request):
+        events = Event.objects.all()
+        user_publications = auth_md.UserPublication.objects.all()
 
+        serialized_events = EventSerializer(events, many=True).data
+        serialized_user_publications = auth_sz.UserPublicationSerializer(user_publications, many=True).data
+
+        combined_list = serialized_events + serialized_user_publications
+
+        shuffle(combined_list)
+
+        return response.Response(combined_list)
 
 
 
