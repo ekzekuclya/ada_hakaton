@@ -65,16 +65,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['user', 'followers', 'following']
+        fields = '__all__'
 
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notifications
-        fields = ['id', 'content']
+        fields = '__all__'
 
 
 class UserPublicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPublication
-        fields = ['event', 'user_profile']
+        fields = '__all__'

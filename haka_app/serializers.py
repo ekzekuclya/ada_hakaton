@@ -6,7 +6,7 @@ from auth_app import serializers as sz
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ['id', 'title', 'description']
+        fields = '__all__'
 
 
 class MixedScrollList(serializers.ModelSerializer):
