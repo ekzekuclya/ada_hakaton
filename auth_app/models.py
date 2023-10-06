@@ -14,6 +14,7 @@ class UserProfile(models.Model):
     future_events = models.ManyToManyField(haka_app.Event, related_name='subscribed_event', blank=True)
     followers = models.ManyToManyField(CustomUser, 'followers', symmetrical=False)
     following = models.ManyToManyField(CustomUser, 'following', symmetrical=False)
+    img = models.JSONField(default=[])
 
 
 class Notifications(models.Model):
@@ -37,6 +38,7 @@ class Comment(models.Model):
 
 class UserPublication(models.Model):
     event = models.ForeignKey(haka_app.Event, on_delete=models.CASCADE, null=True, blank=True)
+    img = models.JSONField(default=[])
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     description = models.CharField(max_length=255)
     tags = models.ManyToManyField(Tag, blank=True)

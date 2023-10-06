@@ -21,4 +21,5 @@ class Event(models.Model):
     followers = models.ManyToManyField('auth_app.CustomUser', related_name='event_followers', null=True, blank=True)
     anonymous_followers = models.ManyToManyField('auth_app.AnonymousUser', related_name='anonymous_follower', null=True, blank=True)
     tags = models.ManyToManyField('auth_app.Tag')
+    img = models.JSONField(default=[])
 
