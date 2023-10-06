@@ -78,6 +78,15 @@ class EventViewSet(viewsets.ModelViewSet):
         else:
             return response.Response({"detail": "Ивент уже набрал людей"}, status=status.HTTP_403_FORBIDDEN)
 
+    @action(detail=True, methods=['GET'], url_path='subscribers')
+    def get_subscribed_followers(self, request, pk):
+        event = Event.objects.get(id=pk)
+        subscribers = event.followers.all()
+        serializer = auth_sz.LoginSerializer(subscribers, many=True)
+
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 
 

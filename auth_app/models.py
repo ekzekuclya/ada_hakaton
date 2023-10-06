@@ -36,6 +36,9 @@ class AnonymousUser(models.Model):
 class Tag(models.Model):
     hashtag = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.hashtag
+
 
 class Comment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

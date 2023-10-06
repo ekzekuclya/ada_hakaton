@@ -83,6 +83,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class UserPublicationSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True).data
+    user_profile = serializers.CharField(source='user_profile.user.username')
 
     def to_representation(self, instance):
         res = super().to_representation(instance)
