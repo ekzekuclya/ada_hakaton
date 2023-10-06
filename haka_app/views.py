@@ -86,8 +86,59 @@ class EventViewSet(viewsets.ModelViewSet):
 
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['GET'], url_path='public')
+    def get_event_publications(self, request, pk):
+        public = auth_md.UserPublication.objects.filter(event_id=pk)
+        return response.Response(auth_sz.UserPublicationSerializer(public, many=True).data, status=status.HTTP_200_OK)
 
+    # @action(detail=True, methods=['POST'], url_path='add-public')
+    # def add_publication(self, request, pk):
+    #     user_profile = auth_md.UserProfile.objects.get(user=self.request.user)
+    #     event = Event.objects.get(id=pk)
+    #     description = self.request.data.get('description')
+    #     print(description)
+    #     if event.user == user_profile.user:
+    #         if self.request.get('description'):
+    #             public = auth_md.UserPublication.objects.create(user_profile=user_profile, event=event)
+    #         return response.Response(auth_sz.UserPublicationSerializer(public).data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['POST'], url_path='add-public')
+    def add_publication(self, request, pk):
+        user_profile = auth_md.UserProfile.objects.get(user=self.request.user)
+        event = Event.objects.get(id=pk)
+        description = self.request.data.get('description')
+        if event.user == user_profile.user:
+            if description:
+                public = auth_md.UserPublication.objects.create(
+                    user_profile=user_profile,
+                    event=event,
+                    description=description
+                )
+                return response.Response(auth_sz.UserPublicationSerializer(public).data, status=status.HTTP_200_OK)
+            else:
+                return response.Response({'error': 'Description is required'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return response.Response({'error': 'You do not have permission to add publications to this event'},
+                                     status=status.HTTP_403_FORBIDDEN)
+
+    @action(detail=True, methods=['POST'], url_path='tweet')
+    def tweet(self, request, pk):
+        user_profile = auth_md.UserProfile.objects.get(user=self.request.user)
+        event = Event.objects.get(id=pk)
+        description = self.request.data.get('description')
+        if event.user != user_profile.user:
+            if description:
+                public = auth_md.UserPublication.objects.create(
+                    user_profile=user_profile,
+                    event=event,
+                    description=description
+                )
+                return response.Response(auth_sz.UserPublicationSerializer(public).data, status=status.HTTP_200_OK)
+            else:
+                return response.Response({'error': 'Description is required'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return response.Response({'error': 'You do not have permission to add publications to this event'},
+                                     status=status.HTTP_403_FORBIDDEN)
 
 
 

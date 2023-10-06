@@ -24,7 +24,7 @@ class UserProfilePermission(permissions.BasePermission):
         #
         #     if view.action in ['subscribe', 'unsubscribe']:
         #         return True
-        return False
+        return True
 
 
 class NotificationPermission(permissions.BasePermission):
@@ -34,3 +34,6 @@ class NotificationPermission(permissions.BasePermission):
                 return True
             return False
         return False
+
+
+

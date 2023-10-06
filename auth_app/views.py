@@ -3,9 +3,9 @@ from rest_framework.authtoken.models import Token
 from django.utils import timezone
 from django_filters import exceptions
 from rest_framework import generics, response, status, exceptions, viewsets
-from .models import CustomUser as User, UserProfile, Notifications, UserPublication, Tag
+from .models import CustomUser as User, UserProfile, Notifications, UserPublication, Tag, Comment
 from .serializers import (RegUserSerializer, LoginSerializer,
-                          UserProfileSerializer, NotificationSerializer, UserPublicationSerializer)
+                          UserProfileSerializer, NotificationSerializer, UserPublicationSerializer, CommentSerializer)
 from rest_framework.permissions import AllowAny
 from .permissions import UserProfilePermission, NotificationPermission
 from rest_framework.decorators import action
@@ -83,6 +83,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         target_user_profile.save()
         return response.Response({"detail": "You unsubscribed"}, status=status.HTTP_200_OK)
 
+
+
+
     @action(detail=True, methods=['GET'], url_path='followers')
     def get_followers(self, request, pk):
         user_profile = UserProfile.objects.get(id=pk)
@@ -128,6 +131,12 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
         return response.Response(friends_list, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['GET'], url_path='public')
+    def get_userprofile_publications(self, request, pk):
+        public = UserPublication.objects.filter(user_profile_id=pk)
+        return response.Response(UserPublicationSerializer(public, many=True).data, status=status.HTTP_200_OK)
+
+
 
 class NotificationViewSet(APIView):
     queryset = Notifications.objects.all()
@@ -149,7 +158,11 @@ class UserPublicationView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user_pk = self.kwargs.get('user_pk')
-
+        event_pk = self.kwargs.get('event_pk')
+        print(event_pk)
+        if event_pk:
+            event = haka_md.Event.objects.get(id=event_pk)
+            return UserPublication.objects.filter(event=event)
         if user_pk:
             user_profile = UserProfile.objects.get(user_id=user_pk)
             return UserPublication.objects.filter(user_profile=user_profile)
@@ -158,9 +171,8 @@ class UserPublicationView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.user.is_authenticated:
-            userprofile_pk = self.kwargs['user_pk']
-            if userprofile_pk:
-                userprofile = UserProfile.objects.get(id=userprofile_pk)
+            userprofile = UserProfile.objects.get(user=self.request.user)
+            if userprofile:
                 serializer.save(user_profile=userprofile)
 
     def create(self, request, *args, **kwargs):
@@ -177,6 +189,10 @@ class UserPublicationView(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
 
 

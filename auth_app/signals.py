@@ -39,11 +39,13 @@ def create_notification(sender, instance, action, reverse, model, pk_set, **kwar
 
 
 @receiver(post_save, sender=UserPublication)
-def create_comment_to_publication(sender, instance, created, **kwargs):
+def notification_to_followers(sender, instance, created, **kwargs):
+    print(instance.user_profile)
     if created:  # Это означает, что комментарий создается только при создании UserPublication
-        user = instance.user_profile.user  # Получаем пользователя из связанного профиля
-        comment, created = Comment.objects.get_or_create(publication=instance, user=user)
-        comment.save()
+        user = instance.user_profile.user
+        text = f'Ожидаемый вами ивент опубликовал пост! {instance.description}'
+        notification = Notifications.objects.create(user=user, content=text)
+        notification.save()
 
 
 

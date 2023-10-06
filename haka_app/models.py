@@ -9,7 +9,7 @@ class Event(models.Model):
         ('weeks_event', 'Ивенты от юрлиц'),
         ('users_event', 'Ивенты от пользователей')
     )
-    priority = models.CharField(choices=PRIORITY, max_length=255)
+    priority = models.CharField(choices=PRIORITY, max_length=255, blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
     date_created = models.DateField(null=True, auto_now_add=True)
@@ -25,11 +25,11 @@ class Event(models.Model):
     can_subscribe = models.CharField(choices=CAN_SUBSCRIBE, max_length=255, default='all')
     followers = models.ManyToManyField('auth_app.CustomUser', related_name='event_followers', null=True, blank=True)
     anonymous_followers = models.ManyToManyField('auth_app.AnonymousUser', related_name='anonymous_follower', blank=True)
-    tags = models.ManyToManyField('auth_app.Tag')
-    img = models.JSONField(default=[])
-    start_event_date = models.DateField(null=True)
-    end_event_date = models.DateField(null=True)
-    limit_of_followers = models.PositiveIntegerField(null=True)
+    tags = models.ManyToManyField('auth_app.Tag', blank=True)
+    img = models.JSONField(default=[], blank=True)
+    start_event_date = models.DateField(null=True, blank=True)
+    end_event_date = models.DateField(null=True, blank=True)
+    limit_of_followers = models.PositiveIntegerField(null=True, blank=True)
 
     def count_followers(self):
         return self.followers.count()

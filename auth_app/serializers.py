@@ -1,4 +1,4 @@
-from .models import CustomUser as User, UserProfile, Notifications, UserPublication, Tag
+from .models import CustomUser as User, UserProfile, Notifications, UserPublication, Tag, Comment
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -83,16 +83,43 @@ class TagSerializer(serializers.ModelSerializer):
 
 class UserPublicationSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True).data
-    user_profile = serializers.CharField(source='user_profile.user.username')
+    user_profile = serializers.SerializerMethodField()
+    event_info = serializers.SerializerMethodField()
+
+    def get_user_profile(self, obj):
+        user_profile = obj.user_profile
+        if user_profile:
+            return user_profile.user.username
+        return None
+
+    def get_event_info(self, obj):
+        if obj.event:
+            event = obj.event
+            event_info = {
+                'id': event.id,
+                'title': event.title,
+                'followers': event.followers.count()  # Количество фолловеров события
+            }
+            return event_info
+        return None
 
     def to_representation(self, instance):
         res = super().to_representation(instance)
-        if res['event']:
-            res['event'] = f'ID: {instance.event.id}, title: {instance.event.title}'
-
+        user_profile_info = res.pop('user_profile')
+        if user_profile_info:
+            res['user_profile'] = user_profile_info
+        event_info = res.pop('event_info')
+        if event_info:
+            res['event'] = event_info
         return res
 
     class Meta:
         model = UserPublication
         fields = '__all__'
         read_only_fields = ('user_profile',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'

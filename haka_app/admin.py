@@ -4,5 +4,5 @@ from .models import Event
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['user']
+    list_display = ['id', 'user']
 

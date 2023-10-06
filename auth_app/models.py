@@ -51,6 +51,7 @@ class Comment(models.Model):
 
 
 class UserPublication(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     event = models.ForeignKey(haka_app.Event, on_delete=models.CASCADE, null=True, blank=True)
     img = models.JSONField(default=[])
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, null=True, blank=True)
