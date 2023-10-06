@@ -48,7 +48,6 @@ INSTALLED_APPS = [
 
 
 ]
-STATIC_URL = '/static/'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
