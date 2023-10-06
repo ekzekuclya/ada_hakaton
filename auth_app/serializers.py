@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 
+
 class RegUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=User.objects.all())]
@@ -75,6 +76,14 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 
 class UserPublicationSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        res = super().to_representation(instance)
+        if res['event']:
+            res['event'] = f'ID: {instance.event.id}, title: {instance.event.title}'
+        return res
+
     class Meta:
         model = UserPublication
         fields = '__all__'
+        read_only_fields = ('user_profile',)

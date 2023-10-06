@@ -3,19 +3,25 @@ from rest_framework.authtoken.models import Token
 from django.utils import timezone
 from django_filters import exceptions
 from rest_framework import generics, response, status, exceptions, viewsets
-from .models import CustomUser as User, UserProfile, Notifications, UserPublication
+from .models import CustomUser as User, UserProfile, Notifications, UserPublication, Tag
 from .serializers import (RegUserSerializer, LoginSerializer,
                           UserProfileSerializer, NotificationSerializer, UserPublicationSerializer)
 from rest_framework.permissions import AllowAny
 from .permissions import UserProfilePermission, NotificationPermission
 from rest_framework.decorators import action
 from haka_app import serializers as haka_sz, models as haka_md
+from rest_framework.views import APIView
+from random import randint, choice
 
 
 class RegUserViewSet(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegUserSerializer
     permission_classes = [AllowAny]     # Исключение Auth
+
+
+
+
 
 
 class LoginView(generics.GenericAPIView):
@@ -123,15 +129,18 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return response.Response(friends_list, status=status.HTTP_200_OK)
 
 
-class NotificationViewSet(viewsets.ModelViewSet):
+class NotificationViewSet(APIView):
     queryset = Notifications.objects.all()
     serializer_class = NotificationSerializer
     permission_classes = [NotificationPermission]
 
-    def get_queryset(self):
-        user = self.request.user
-        notifications = Notifications.objects.filter(user=user)
-        return notifications
+    def get(self, request):
+        if self.request.user.is_authenticated:
+            user = self.request.user
+            notifications = Notifications.objects.filter(user=user)
+            return response.Response(NotificationSerializer(notifications, many=True).data, status=status.HTTP_200_OK)
+        else:
+            return response.Response(NotificationSerializer(Notifications.objects.none()).data, status=status.HTTP_404_NOT_FOUND)
 
 
 class UserPublicationView(viewsets.ModelViewSet):
@@ -143,7 +152,32 @@ class UserPublicationView(viewsets.ModelViewSet):
         if userprofile_pk:
             return UserPublication.objects.filter(user_profile_id=userprofile_pk)
         else:
-            return response.Response({"detail": "Не найден профиль"}, status=status.HTTP_404_NOT_FOUND)
+            return UserPublication.objects.none()
+
+    def perform_create(self, serializer):
+        if self.request.user.is_authenticated:
+            userprofile_pk = self.kwargs['user_pk']
+            if userprofile_pk:
+                userprofile = UserProfile.objects.get(id=userprofile_pk)
+                serializer.save(user_profile=userprofile)
+
+    def create(self, request, *args, **kwargs):
+        if request.data['tags']:
+            tags_list = []
+            for i in request.data['tags']:
+                tag, created = Tag.objects.get_or_create(hashtag=i)
+                tags_list.append(tag.id)
+            request.data['tags'] = tags_list
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+
+
+
 
 
 

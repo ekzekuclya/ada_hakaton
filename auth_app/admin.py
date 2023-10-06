@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, CustomUser, Notifications, AnonymousUser, UserPublication
+from .models import UserProfile, CustomUser, Notifications, AnonymousUser, UserPublication, Comment, Tag
 
 
 @admin.register(UserProfile)
@@ -25,3 +25,13 @@ class AnonymousUser(admin.ModelAdmin):
 @admin.register(UserPublication)
 class PublicationAdmin(admin.ModelAdmin):
     list_display = ['user_profile']
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['user']
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ['hashtag']

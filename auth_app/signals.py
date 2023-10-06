@@ -1,17 +1,28 @@
 from django.db.models.signals import pre_save, post_save
-from .models import CustomUser, UserProfile, Notifications
+from .models import CustomUser, UserProfile, Notifications, UserPublication, Comment
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
+from random import choice, randint
+image_list = ["https://i.pinimg.com/236x/51/91/dc/5191dc77fb76fa9ef4a11eef260b101f.jpg",
+              "https://i.pinimg.com/236x/21/fc/fd/21fcfd108a79026900ff6bd8a0563095.jpg",
+              "https://i.pinimg.com/236x/c8/73/34/c87334fe49476009f5d367d145c80751.jpg",
+              "https://i.pinimg.com/236x/e8/32/12/e8321254fcfa739945ff2be6ae6cf959.jpg",
+              "https://i.pinimg.com/236x/a2/d0/11/a2d011fd77bd1c37b08cf6ca0ff42e37.jpg",
+              "https://i.pinimg.com/236x/6a/96/dc/6a96dc859d024bb1e7162aa7b8c355a0.jpg",
+              "https://i.pinimg.com/236x/6f/75/dd/6f75dd3224eb393b8db83eabcba64595.jpg",
+              "https://i.pinimg.com/236x/fa/24/9c/fa249c8561a4c4c912ae4214983ca726.jpg",
+              "https://i.pinimg.com/236x/e3/cb/58/e3cb58ae530636c8ea84c10d50308687.jpg"
+              ]
 
 
 @receiver(post_save, sender=CustomUser)
 def create_userprofile(sender, instance, created, **kwargs):
-    userprofile, created = UserProfile.objects.get_or_create(user=instance)
     if created:
+        userprofile = UserProfile.objects.create(user=instance, img=[choice(image_list) + ", " for i in range(randint(1, 3))]) ## GENERATOR
         text = f'С регистрацией {instance.username}!'
         notification = Notifications.objects.create(user=instance, content=text)
         notification.save()
-    userprofile.save()
+        userprofile.save()
 
 
 @receiver(m2m_changed, sender=UserProfile.followers.through)
@@ -25,6 +36,14 @@ def create_notification(sender, instance, action, reverse, model, pk_set, **kwar
                                                                                 f""f"is now following you.")
             if created:
                 notification.save()
+
+
+@receiver(post_save, sender=UserPublication)
+def create_comment_to_publication(sender, instance, created, **kwargs):
+    if created:  # Это означает, что комментарий создается только при создании UserPublication
+        user = instance.user_profile.user  # Получаем пользователя из связанного профиля
+        comment, created = Comment.objects.get_or_create(publication=instance, user=user)
+        comment.save()
 
 
 

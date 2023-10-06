@@ -16,10 +16,16 @@ class UserProfile(models.Model):
     following = models.ManyToManyField(CustomUser, 'following', symmetrical=False)
     img = models.JSONField(default=[])
 
+    def __str__(self):
+        return self.user.username
+
 
 class Notifications(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     content = models.TextField()
+
+    def __str__(self):
+        return self.content
 
 
 class AnonymousUser(models.Model):
@@ -34,12 +40,21 @@ class Tag(models.Model):
 class Comment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     publication = models.ForeignKey('UserPublication', on_delete=models.CASCADE, null=True, blank=True)
+    event = models.ForeignKey(haka_app.Event, on_delete=models.CASCADE, null=True, blank=True)
+    user_comment = models.CharField(max_length=255, null=True)
+    content = models.TextField()
+
+    def __str__(self):
+        return f'{self.user.username}, "{self.content}"'
 
 
 class UserPublication(models.Model):
     event = models.ForeignKey(haka_app.Event, on_delete=models.CASCADE, null=True, blank=True)
     img = models.JSONField(default=[])
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, null=True, blank=True)
     description = models.CharField(max_length=255)
     tags = models.ManyToManyField(Tag, blank=True)
+
+    def __str__(self):
+        return f'{self.user.username}, "{self.user.description}"'
 
