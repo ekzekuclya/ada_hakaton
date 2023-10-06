@@ -1,4 +1,4 @@
-from .models import CustomUser as User, UserProfile, Notifications, UserPublication
+from .models import CustomUser as User, UserProfile, Notifications, UserPublication, Tag
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -75,12 +75,20 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = '__all__'
+
+
 class UserPublicationSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True).data
 
     def to_representation(self, instance):
         res = super().to_representation(instance)
         if res['event']:
             res['event'] = f'ID: {instance.event.id}, title: {instance.event.title}'
+
         return res
 
     class Meta:

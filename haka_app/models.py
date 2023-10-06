@@ -31,6 +31,8 @@ class Event(models.Model):
     end_event_date = models.DateField(null=True)
     limit_of_followers = models.PositiveIntegerField(null=True)
 
+    def count_followers(self):
+        return self.followers.count()
 
     def __str__(self):
         return self.title

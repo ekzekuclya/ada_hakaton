@@ -15,7 +15,8 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [DefaultPermission]
 
     def create(self, request, *args, **kwargs):
-        if request.data['tags']:
+        tags = request.data['tags']
+        if tags:
             tags_list = []
             for i in request.data['tags']:
                 tag, created = auth_md.Tag.objects.get_or_create(hashtag=i)
@@ -37,7 +38,7 @@ class EventViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path='follow')
     def follow(self, request, pk):
         event = Event.objects.get(id=pk)
-        while event.limit_of_followers is None or event.followers.count() < event.limit_of_followers:
+        while event.limit_of_followers is None or event.count_followers() < event.limit_of_followers:
             if event.can_subscribe == 'all':
                 if request.user.is_authenticated:
                     event.followers.add(request.user)

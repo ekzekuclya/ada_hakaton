@@ -41,7 +41,6 @@ class Comment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     publication = models.ForeignKey('UserPublication', on_delete=models.CASCADE, null=True, blank=True)
     event = models.ForeignKey(haka_app.Event, on_delete=models.CASCADE, null=True, blank=True)
-    user_comment = models.CharField(max_length=255, null=True)
     content = models.TextField()
 
     def __str__(self):
@@ -56,5 +55,5 @@ class UserPublication(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
-        return f'{self.user.username}, "{self.user.description}"'
+        return self.user_profile.user.username
 

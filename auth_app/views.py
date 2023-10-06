@@ -148,9 +148,11 @@ class UserPublicationView(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        userprofile_pk = self.kwargs.get('userprofile_pk')
-        if userprofile_pk:
-            return UserPublication.objects.filter(user_profile_id=userprofile_pk)
+        user_pk = self.kwargs.get('user_pk')
+
+        if user_pk:
+            user_profile = UserProfile.objects.get(user_id=user_pk)
+            return UserPublication.objects.filter(user_profile=user_profile)
         else:
             return UserPublication.objects.none()
 
@@ -162,7 +164,8 @@ class UserPublicationView(viewsets.ModelViewSet):
                 serializer.save(user_profile=userprofile)
 
     def create(self, request, *args, **kwargs):
-        if request.data['tags']:
+        tags = request.data.get('tags')
+        if tags:
             tags_list = []
             for i in request.data['tags']:
                 tag, created = Tag.objects.get_or_create(hashtag=i)
