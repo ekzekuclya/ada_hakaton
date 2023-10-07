@@ -29,7 +29,7 @@ class PublicationAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['user']
+    list_display = ['id', 'content']
 
 
 @admin.register(Tag)

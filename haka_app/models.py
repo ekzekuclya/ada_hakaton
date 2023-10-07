@@ -28,7 +28,9 @@ class Event(models.Model):
     tags = models.ManyToManyField('auth_app.Tag', blank=True)
     img = models.JSONField(default=[], blank=True)
     start_event_date = models.DateField(null=True, blank=True)
+    hot = models.BooleanField(default=False)
     end_event_date = models.DateField(null=True, blank=True)
+    is_archived = models.BooleanField(default=False)
     limit_of_followers = models.PositiveIntegerField(null=True, blank=True)
 
     def count_followers(self):

@@ -32,6 +32,9 @@ class AnonymousUser(models.Model):
     ip_address = models.GenericIPAddressField()
     session_key = models.CharField(max_length=255, unique=True)
 
+    def __str__(self):
+        return self.session_key
+
 
 class Tag(models.Model):
     hashtag = models.CharField(max_length=255)
@@ -42,12 +45,12 @@ class Tag(models.Model):
 
 class Comment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
-    anonymous = models.ForeignKey(AnonymousUser, on_delete=models.CASCADE)
+    anonymous = models.ForeignKey(AnonymousUser, on_delete=models.CASCADE, null=True, blank=True)
     publication = models.ForeignKey('UserPublication', on_delete=models.CASCADE, null=True, blank=True)
     content = models.TextField()
 
     def __str__(self):
-        return f'{self.user.username}, "{self.content}"'
+        return self.content
 
 
 class UserPublication(models.Model):
@@ -59,5 +62,5 @@ class UserPublication(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
-        return self.user_profile.user.username
+        return self.description
 

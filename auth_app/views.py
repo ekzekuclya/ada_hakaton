@@ -21,10 +21,6 @@ class RegUserViewSet(generics.CreateAPIView):
     permission_classes = [AllowAny]     # Исключение Auth
 
 
-
-
-
-
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]     # Исключение auth
@@ -85,8 +81,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return response.Response({"detail": "You unsubscribed"}, status=status.HTTP_200_OK)
 
 
-
-
     @action(detail=True, methods=['GET'], url_path='followers')
     def get_followers(self, request, pk):
         user_profile = UserProfile.objects.get(id=pk)
@@ -106,16 +100,16 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return response.Response(haka_sz.EventSerializer(visited_events, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='future-events')
-    def get_visited_events(self, request, pk):
+    def get_future_events(self, request, pk):
         user_profile = UserProfile.objects.get(id=pk)
         future_events = user_profile.future_events.all()
         return response.Response(haka_sz.EventSerializer(future_events, many=True).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path='events')
-    def get_events(self, request, pk):
-        user_profile = UserProfile.objects.get(id=pk)
-        events = haka_md.Event.objects.filter(user=user_profile.user)
-        return response.Response(haka_sz.EventSerializer(events, many=True).data, status=status.HTTP_200_OK)
+    # @action(detail=True, methods=['GET'], url_path='events')
+    # def get_events(self, request, pk):
+    #     user_profile = UserProfile.objects.get(id=pk)
+    #     events = haka_md.Event.objects.filter(user=user_profile.user)
+    #     return response.Response(haka_sz.EventSerializer(events, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='friends')
     def get_friends(self, request, pk):
@@ -189,7 +183,7 @@ class UserPublicationView(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-
+from django.http import Http404
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -197,43 +191,37 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         publication_pk = self.kwargs.get('public_pk')
-        print(publication_pk)
-        publication = UserPublication.objects.get(id=publication_pk)
-        comments = Comment.objects.filter(publication=publication)
-        return comments
+        try:
+            publication = UserPublication.objects.get(id=publication_pk)
+            comments = Comment.objects.filter(publication=publication)
+            return comments
+        except UserPublication.DoesNotExist:
+            raise Http404("UserPublication matching query does not exist")
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
         publication_pk = self.kwargs.get('public_pk')
         if publication_pk:
             publication = UserPublication.objects.get(id=publication_pk)
-            if self.request.user.is_authenticated:
-                user = self.request.user
-                serializer.save(user=user, publication=publication)
-            ip_address = get_client_ip(self.request)
-            session_key = self.request.session.session_key
-            if session_key:
-                anonymous, created = AnonymousUser.objects.get_or_create(ip_address=ip_address)
-                anonymous.session_key = session_key
-                serializer.save(anonymous=anonymous, publication=publication)
-                return response.Response({"detail": "Вы успешно подписались "
-                                                "как Анонимный пользователь"}, status=status.HTTP_200_OK)
-            return response.Response({"detail": "Нет сессии, вероятно вы подключены не через браузер"},
-                                     status=status.HTTP_400_BAD_REQUEST)
+            content = request.data.get('content')
+            if content:
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                if self.request.user.is_authenticated:
+                    user = self.request.user
+                    serializer.save(user=user, content=content, publication=publication)
+                    headers = self.get_success_headers(serializer.data)
+                    return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+                ip_address = get_client_ip(self.request)
+                session_key = self.request.session.session_key
+                if session_key:
+                    anonymous, created = AnonymousUser.objects.get_or_create(ip_address=ip_address)
+                    anonymous.session_key = session_key
+                    serializer.save(anonymous=anonymous, content=content, publication=publication)
+                    headers = self.get_success_headers(serializer.data)
+                    return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+                return response.Response({"detail": "Нет сессии, вероятно вы подключены не через браузер"},
+                                         status=status.HTTP_400_BAD_REQUEST)
         return response.Response({"detail": "Неверный айди публикации"}, status=status.HTTP_404_NOT_FOUND)
-
-    # def create(self, request, *args, **kwargs):
-    #     tags = request.data.get('tags')
-    #     if tags:
-    #         tags_list = []
-    #         for i in request.data['tags']:
-    #             tag, created = Tag.objects.get_or_create(hashtag=i)
-    #             tags_list.append(tag.id)
-    #         request.data['tags'] = tags_list
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 

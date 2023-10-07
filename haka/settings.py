@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,6 +33,7 @@ SESSION_COOKIE_AGE = 1728000  # 20 Days
 SESSION_SAVE_EVERY_REQUEST = True
 
 AUTH_USER_MODEL = 'auth_app.CustomUser'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,7 +46,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'haka_app',
-    'drf_yasg'
+    'drf_yasg',
+    'django_celery_beat',
+
 
 
 ]
@@ -110,8 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
+
 
 LANGUAGE_CODE = 'en-us'
 
@@ -122,8 +125,7 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
 
 STATIC_URL = '/static/'
 
@@ -146,7 +148,26 @@ REST_FRAMEWORK = {
                                 'rest_framework.filters.OrderingFilter'],
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 10
+}
 
+
+CELERY_BEAT_SCHEDULE = {
+    "notify_event_start": {
+        "task": "haka_app.tasks.notify_event_start",
+        "schedule": crontab(minute="*/1"),
+
+
+    },
+    # "send_excel_mail": {
+    #     "task": "books_app.tasks.export_excel",
+    #     "schedule": crontab(minute="*/1")
+    # }
+    # ,
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+CELERY_BROKER_URL="redis://localhost:6379"
+CELERY_RESULT_BACKEND="redis://localhost:6379"
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'

@@ -1,3 +1,7 @@
+from datetime import timedelta
+
+from celery.utils.time import timezone
+
 from .models import Event
 from .serializers import EventSerializer, MixedScrollList
 from rest_framework import viewsets, filters, response, status, generics
@@ -7,10 +11,11 @@ from auth_app import models as auth_md, serializers as auth_sz
 from .utils import get_client_ip
 from random import shuffle
 from rest_framework.views import APIView
+from .tasks import notify_event_start
 
 
 class EventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all()
+    queryset = Event.objects.filter(is_archived=False)
     serializer_class = EventSerializer
     permission_classes = [DefaultPermission]
 
@@ -23,6 +28,8 @@ class EventViewSet(viewsets.ModelViewSet):
                 tags_list.append(tag.id)
             request.data['tags'] = tags_list
         serializer = self.get_serializer(data=request.data)
+        event = serializer.instance
+        notify_event_start.apply_async((), eta=event.start_event_date - timedelta(hours=24))
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -139,7 +146,6 @@ class EventViewSet(viewsets.ModelViewSet):
         else:
             return response.Response({'error': 'You do not have permission to add publications to this event'},
                                      status=status.HTTP_403_FORBIDDEN)
-
 
 
 # class MixedFeedView(viewsets.ModelViewSet):
