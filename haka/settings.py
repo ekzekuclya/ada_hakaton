@@ -154,7 +154,7 @@ REST_FRAMEWORK = {
 CELERY_BEAT_SCHEDULE = {
     "notify_event_start": {
         "task": "haka_app.tasks.notify_event_start",
-        "schedule": crontab(minute="*/1"),
+        "schedule": crontab(minute="*/60"),
 
 
     },
