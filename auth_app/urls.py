@@ -1,5 +1,6 @@
 from rest_framework_nested import routers
-from .views import RegUserViewSet,LoginView, UserProfileViewSet, NotificationViewSet, UserPublicationView, CommentViewSet
+from .views import (RegUserViewSet,LoginView, UserProfileViewSet, NotificationViewSet,
+                    UserPublicationView, CommentViewSet, TagViewSet)
 from django.urls import path, include
 from rest_framework_simplejwt.views import (
     TokenObtainPairView, TokenRefreshView
@@ -19,5 +20,6 @@ urlpatterns = [
     path('signup/', RegUserViewSet.as_view(), name='signup'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('notification/', NotificationViewSet.as_view(), name='notification')
+    path('notification/', NotificationViewSet.as_view(), name='notification'),
+    path('tags/', TagViewSet.as_view(), name='tag'),
 ]

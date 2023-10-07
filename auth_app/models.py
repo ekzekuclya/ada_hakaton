@@ -14,7 +14,7 @@ class UserProfile(models.Model):
     future_events = models.ManyToManyField(haka_app.Event, related_name='subscribed_event', blank=True)
     followers = models.ManyToManyField(CustomUser, 'followers', symmetrical=False)
     following = models.ManyToManyField(CustomUser, 'following', symmetrical=False)
-    img = models.JSONField(default=[])
+    img = models.JSONField(default=[], blank=True, null=True)
 
     def __str__(self):
         return self.user.username

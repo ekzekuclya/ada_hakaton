@@ -13,7 +13,8 @@ from haka_app import serializers as haka_sz, models as haka_md
 from rest_framework.views import APIView
 from random import randint, choice
 from .utils import get_client_ip
-from django.http import Http404
+from django.http import Http404, HttpResponseBadRequest
+from random import shuffle
 
 
 class RegUserViewSet(generics.CreateAPIView):
@@ -224,6 +225,30 @@ class CommentViewSet(viewsets.ModelViewSet):
                                          status=status.HTTP_400_BAD_REQUEST)
             return response.Response({"detail": "Напишите content"}, status=status.HTTP_400_BAD_REQUEST)
         return response.Response({"detail": "Неверный айди публикации"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class TagViewSet(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        search_tags = request.GET.get('search', '')
+        if not search_tags:
+            return response.Response({"detail": "Параметр 'search' должен содержать хэштеги через запятую."},
+                                     status=status.HTTP_400_BAD_REQUEST)
+
+        search_tags_list = search_tags.split(',')
+
+        events = haka_md.Event.objects.filter(display_to_all=True, tags__hashtag__in=search_tags_list)
+        user_publications = UserPublication.objects.filter(tags__hashtag__in=search_tags_list)
+
+        serialized_events = haka_sz.EventSerializer(events, many=True).data
+        serialized_user_publications = UserPublicationSerializer(user_publications, many=True).data
+
+        combined_list = serialized_events + serialized_user_publications
+        shuffle(combined_list)
+
+        return response.Response(combined_list)
+
 
 
 
