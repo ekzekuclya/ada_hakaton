@@ -98,19 +98,8 @@ class EventViewSet(viewsets.ModelViewSet):
         public = auth_md.UserPublication.objects.filter(event_id=pk)
         return response.Response(auth_sz.UserPublicationSerializer(public, many=True).data, status=status.HTTP_200_OK)
 
-    # @action(detail=True, methods=['POST'], url_path='add-public')
-    # def add_publication(self, request, pk):
-    #     user_profile = auth_md.UserProfile.objects.get(user=self.request.user)
-    #     event = Event.objects.get(id=pk)
-    #     description = self.request.data.get('description')
-    #     print(description)
-    #     if event.user == user_profile.user:
-    #         if self.request.get('description'):
-    #             public = auth_md.UserPublication.objects.create(user_profile=user_profile, event=event)
-    #         return response.Response(auth_sz.UserPublicationSerializer(public).data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['POST'], url_path='add-public')
-    def add_publication(self, request, pk):
+    @action(detail=True, methods=['POST'], url_path='tweet')
+    def tweet(self, request, pk):
         user_profile = auth_md.UserProfile.objects.get(user=self.request.user)
         event = Event.objects.get(id=pk)
         description = self.request.data.get('description')
@@ -124,16 +113,7 @@ class EventViewSet(viewsets.ModelViewSet):
                 return response.Response(auth_sz.UserPublicationSerializer(public).data, status=status.HTTP_200_OK)
             else:
                 return response.Response({'error': 'Description is required'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return response.Response({'error': 'You do not have permission to add publications to this event'},
-                                     status=status.HTTP_403_FORBIDDEN)
-
-    @action(detail=True, methods=['POST'], url_path='tweet')
-    def tweet(self, request, pk):
-        user_profile = auth_md.UserProfile.objects.get(user=self.request.user)
-        event = Event.objects.get(id=pk)
-        description = self.request.data.get('description')
-        if event.user != user_profile.user:
+        elif event.user != user_profile.user:
             if description:
                 public = auth_md.UserPublication.objects.create(
                     user_profile=user_profile,
@@ -147,19 +127,29 @@ class EventViewSet(viewsets.ModelViewSet):
             return response.Response({'error': 'You do not have permission to add publications to this event'},
                                      status=status.HTTP_403_FORBIDDEN)
 
-
-# class MixedFeedView(viewsets.ModelViewSet):
-#     serializer_class = MixedScrollList
-#     permission_classes = [DefaultPermission]
-#
-#     def get_queryset(self):
-#         events = Event.objects.all()
-#         user_publications = auth_md.UserPublication.objects.all()
-#         mixed_feed = {
-#             'user_publication': user_publications,
-#             'events': events,
-#         }
-#         return mixed_feed
+    @action(detail=True, methods=['POST'], url_path='remove-followers')
+    def remove_follower_from_event_followers(self, request, pk):
+        event = Event.objects.get(id=pk)
+        if event:
+            user = request.user
+            if event.user == user:
+                user_to_remove = request.data.get('users_id')
+                if user_to_remove:
+                    for i in user_to_remove:
+                        user = auth_md.CustomUser.objects.get(id=i)
+                        user_profile = auth_md.UserProfile.objects.get(user=user)
+                        if user in event.followers.all():
+                            event.followers.remove(user)
+                            event.save()
+                            if event in user_profile.future_events.all():
+                                user_profile.future_events.remove(event)
+                                user_profile.save()
+                            return response.Response(EventSerializer(event).data, status=status.HTTP_200_OK)
+                        return response.Response({"detail": "Указанного юзера нет в ваших ивент подписках"}, status=status.HTTP_400_BAD_REQUEST)
+                    return response.Response(EventSerializer(event).data, status=status.HTTP_200_OK)
+                return response.Response({"detail": "Введите id юзеров, которых хотите удалить"}, status=status.HTTP_400_BAD_REQUEST)
+            return response.Response({"detail": "Вы не имеет право редактировать этот Ивент"}, status=status.HTTP_403_FORBIDDEN)
+        return response.Response({"detail": "Ивент не найдет"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class MixedFeedView(APIView):

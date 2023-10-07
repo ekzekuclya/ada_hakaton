@@ -154,7 +154,8 @@ REST_FRAMEWORK = {
 CELERY_BEAT_SCHEDULE = {
     "notify_event_start": {
         "task": "haka_app.tasks.notify_event_start",
-        "schedule": crontab(minute="*/60"),
+        "schedule": crontab(hour="*/5"),   # minute="*")
+
 
 
     },
@@ -166,8 +167,21 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# CELERY
 CELERY_BROKER_URL="redis://localhost:6379"
 CELERY_RESULT_BACKEND="redis://localhost:6379"
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
+
+# EMAIL API
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'ekzekuciya07@gmail.com'
+EMAIL_HOST_PASSWORD = 'CRgPSQE2IYfyFdrt'
+
+
+

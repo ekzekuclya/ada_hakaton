@@ -21,10 +21,14 @@ def notification_to_event_owner(sender, instance, action, reverse, model, pk_set
     if action == 'post_add':
         event_owner = instance.user
         new_follower = auth_md.CustomUser.objects.filter(id__in=pk_set).first()
+        user_profile = auth_md.UserProfile.objects.get(user=new_follower)
         if new_follower:
-            text = f'{new_follower.username} подписался на ваше событие "{instance.title}"'
-            notification = auth_md.Notifications.objects.create(user=event_owner, content=text)
-            notification.save()
+            if new_follower in instance.followers.all():
+                user_profile.future_events.add(instance)
+                text = f'{new_follower.username} подписался на ваше событие "{instance.title}"'
+                notification = auth_md.Notifications.objects.create(user=event_owner, content=text)
+                user_profile.save()
+                notification.save()
 
 
 

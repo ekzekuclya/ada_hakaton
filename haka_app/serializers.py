@@ -10,14 +10,9 @@ class EventSerializer(serializers.ModelSerializer):
     tags = serializers.StringRelatedField(many=True)
 
     def get_followers(self, obj):
-        # Ограничьте количество фолловеров до 10
         followers = obj.followers.all()[:10]
-
-        # Если есть более 10 фолловеров, то верните их количество
         if obj.followers.count() > 5:
             return f"{obj.followers.count()} followers"
-
-        # В противном случае, верните имена фолловеров
         return [follower.username for follower in followers]
 
     class Meta:

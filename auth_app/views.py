@@ -13,6 +13,7 @@ from haka_app import serializers as haka_sz, models as haka_md
 from rest_framework.views import APIView
 from random import randint, choice
 from .utils import get_client_ip
+from django.http import Http404
 
 
 class RegUserViewSet(generics.CreateAPIView):
@@ -80,7 +81,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         target_user_profile.save()
         return response.Response({"detail": "You unsubscribed"}, status=status.HTTP_200_OK)
 
-
     @action(detail=True, methods=['GET'], url_path='followers')
     def get_followers(self, request, pk):
         user_profile = UserProfile.objects.get(id=pk)
@@ -88,7 +88,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return response.Response(RegUserSerializer(followers, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='following')
-    def get_followers(self, request, pk):
+    def get_following(self, request, pk):
         user_profile = UserProfile.objects.get(id=pk)
         following = user_profile.following.all()
         return response.Response(RegUserSerializer(following, many=True).data, status=status.HTTP_200_OK)
@@ -103,6 +103,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def get_future_events(self, request, pk):
         user_profile = UserProfile.objects.get(id=pk)
         future_events = user_profile.future_events.all()
+        print(future_events)
         return response.Response(haka_sz.EventSerializer(future_events, many=True).data, status=status.HTTP_200_OK)
 
     # @action(detail=True, methods=['GET'], url_path='events')
@@ -183,7 +184,7 @@ class UserPublicationView(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-from django.http import Http404
+
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -221,6 +222,7 @@ class CommentViewSet(viewsets.ModelViewSet):
                     return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
                 return response.Response({"detail": "Нет сессии, вероятно вы подключены не через браузер"},
                                          status=status.HTTP_400_BAD_REQUEST)
+            return response.Response({"detail": "Напишите content"}, status=status.HTTP_400_BAD_REQUEST)
         return response.Response({"detail": "Неверный айди публикации"}, status=status.HTTP_404_NOT_FOUND)
 
 
