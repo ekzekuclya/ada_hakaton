@@ -50,21 +50,52 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     permission_classes = [UserProfilePermission]
 
+    # @action(detail=True, methods=['POST'], url_path='subscribe')
+    # def follow(self, request, pk):
+    #     current_user = request.user
+    #     a = UserProfile.objects.get(id=pk)
+    #     target_user = a.user
+    #
+    #     current_user_profile = UserProfile.objects.filter(user=request.user).first()
+    #     target_user_profile = UserProfile.objects.filter(user=target_user).first()
+    #
+    #     current_user_profile.following.add(target_user)
+    #     target_user_profile.followers.add(current_user)
+    #
+    #     current_user_profile.save()
+    #     target_user_profile.save()
+    #     return response.Response({"detail": "You subscribed"}, status=status.HTTP_200_OK)
+
+    from rest_framework import status
+
     @action(detail=True, methods=['POST'], url_path='subscribe')
     def follow(self, request, pk):
-        current_user = request.user
-        a = UserProfile.objects.get(id=pk)
-        target_user = a.user
+        try:
+            if self.request.user.is_authenticated:
+                current_user = request.user
+                a = UserProfile.objects.get(id=pk)
+                target_user = a.user
 
-        current_user_profile = UserProfile.objects.filter(user=request.user).first()
-        target_user_profile = UserProfile.objects.filter(user=target_user).first()
+                current_user_profile = UserProfile.objects.filter(user=request.user).first()
+                target_user_profile = UserProfile.objects.filter(user=target_user).first()
 
-        current_user_profile.following.add(target_user)
-        target_user_profile.followers.add(current_user)
+                if not current_user_profile:
+                    return response.Response({"detail": "Current user profile not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        current_user_profile.save()
-        target_user_profile.save()
-        return response.Response({"detail": "You subscribed"}, status=status.HTTP_200_OK)
+                if not target_user_profile:
+                    return response.Response({"detail": "Target user profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+                current_user_profile.following.add(target_user)
+                target_user_profile.followers.add(current_user)
+
+                current_user_profile.save()
+                target_user_profile.save()
+                return response.Response({"detail": "You subscribed"}, status=status.HTTP_200_OK)
+            return response.Response({"detail": "User не авторизован"}, status=status.HTTP_403_FORBIDDEN)
+        except UserProfile.DoesNotExist:
+            return response.Response({"detail": "UserProfile does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return response.Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['POST'], url_path='unsubscribe')
     def unfollow(self, request, pk):

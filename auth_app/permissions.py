@@ -20,10 +20,9 @@ class UserProfilePermission(permissions.BasePermission):
             return True
         if view.action in ['subscribe', 'unsubscribe']:
             return True
-        # if request.user.is_authenticated:
-        #
-        #     if view.action in ['subscribe', 'unsubscribe']:
-        #         return True
+        if request.user.is_authenticated:
+            if view.action in ['subscribe', 'unsubscribe']:
+                return True
         return True
 
 
