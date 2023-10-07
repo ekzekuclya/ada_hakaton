@@ -41,9 +41,9 @@ class Tag(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    anonymous = models.ForeignKey(AnonymousUser, on_delete=models.CASCADE)
     publication = models.ForeignKey('UserPublication', on_delete=models.CASCADE, null=True, blank=True)
-    event = models.ForeignKey(haka_app.Event, on_delete=models.CASCADE, null=True, blank=True)
     content = models.TextField()
 
     def __str__(self):

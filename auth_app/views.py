@@ -3,7 +3,7 @@ from rest_framework.authtoken.models import Token
 from django.utils import timezone
 from django_filters import exceptions
 from rest_framework import generics, response, status, exceptions, viewsets
-from .models import CustomUser as User, UserProfile, Notifications, UserPublication, Tag, Comment
+from .models import CustomUser as User, UserProfile, Notifications, UserPublication, Tag, Comment, AnonymousUser
 from .serializers import (RegUserSerializer, LoginSerializer,
                           UserProfileSerializer, NotificationSerializer, UserPublicationSerializer, CommentSerializer)
 from rest_framework.permissions import AllowAny
@@ -12,6 +12,7 @@ from rest_framework.decorators import action
 from haka_app import serializers as haka_sz, models as haka_md
 from rest_framework.views import APIView
 from random import randint, choice
+from .utils import get_client_ip
 
 
 class RegUserViewSet(generics.CreateAPIView):
@@ -137,7 +138,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return response.Response(UserPublicationSerializer(public, many=True).data, status=status.HTTP_200_OK)
 
 
-
 class NotificationViewSet(APIView):
     queryset = Notifications.objects.all()
     serializer_class = NotificationSerializer
@@ -155,19 +155,19 @@ class NotificationViewSet(APIView):
 class UserPublicationView(viewsets.ModelViewSet):
     serializer_class = UserPublicationSerializer
     permission_classes = [AllowAny]
-
-    def get_queryset(self):
-        user_pk = self.kwargs.get('user_pk')
-        event_pk = self.kwargs.get('event_pk')
-        print(event_pk)
-        if event_pk:
-            event = haka_md.Event.objects.get(id=event_pk)
-            return UserPublication.objects.filter(event=event)
-        if user_pk:
-            user_profile = UserProfile.objects.get(user_id=user_pk)
-            return UserPublication.objects.filter(user_profile=user_profile)
-        else:
-            return UserPublication.objects.none()
+    queryset = UserPublication.objects.all()
+    # def get_queryset(self):
+    #     user_pk = self.kwargs.get('user_pk')
+    #     event_pk = self.kwargs.get('event_pk')
+    #     print(event_pk)
+    #     if event_pk:
+    #         event = haka_md.Event.objects.get(id=event_pk)
+    #         return UserPublication.objects.filter(event=event)
+    #     if user_pk:
+    #         user_profile = UserProfile.objects.get(user_id=user_pk)
+    #         return UserPublication.objects.filter(user_profile=user_profile)
+    #     else:
+    #         return UserPublication.objects.none()
 
     def perform_create(self, serializer):
         if self.request.user.is_authenticated:
@@ -193,10 +193,47 @@ class UserPublicationView(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        publication_pk = self.kwargs.get('public_pk')
+        print(publication_pk)
+        publication = UserPublication.objects.get(id=publication_pk)
+        comments = Comment.objects.filter(publication=publication)
+        return comments
 
+    def perform_create(self, serializer):
+        publication_pk = self.kwargs.get('public_pk')
+        if publication_pk:
+            publication = UserPublication.objects.get(id=publication_pk)
+            if self.request.user.is_authenticated:
+                user = self.request.user
+                serializer.save(user=user, publication=publication)
+            ip_address = get_client_ip(self.request)
+            session_key = self.request.session.session_key
+            if session_key:
+                anonymous, created = AnonymousUser.objects.get_or_create(ip_address=ip_address)
+                anonymous.session_key = session_key
+                serializer.save(anonymous=anonymous, publication=publication)
+                return response.Response({"detail": "Вы успешно подписались "
+                                                "как Анонимный пользователь"}, status=status.HTTP_200_OK)
+            return response.Response({"detail": "Нет сессии, вероятно вы подключены не через браузер"},
+                                     status=status.HTTP_400_BAD_REQUEST)
+        return response.Response({"detail": "Неверный айди публикации"}, status=status.HTTP_404_NOT_FOUND)
 
-
+    # def create(self, request, *args, **kwargs):
+    #     tags = request.data.get('tags')
+    #     if tags:
+    #         tags_list = []
+    #         for i in request.data['tags']:
+    #             tag, created = Tag.objects.get_or_create(hashtag=i)
+    #             tags_list.append(tag.id)
+    #         request.data['tags'] = tags_list
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 

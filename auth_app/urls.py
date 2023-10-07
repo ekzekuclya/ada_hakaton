@@ -10,9 +10,12 @@ router = routers.DefaultRouter()
 router.register('user', UserProfileViewSet, basename='user')
 router.register('public', UserPublicationView, basename='public')
 
+public_router = routers.NestedDefaultRouter(router, r'public', lookup='public')
+public_router.register('comments', CommentViewSet, basename='comments')
+
 urlpatterns = [
     path('', include(router.urls)),
-
+    path('', include(public_router.urls)),
     path('signup/', RegUserViewSet.as_view(), name='signup'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
