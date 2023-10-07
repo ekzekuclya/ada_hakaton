@@ -34,6 +34,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 AUTH_USER_MODEL = 'auth_app.CustomUser'
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,7 +65,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'haka.urls'
-
+CORS_ALLOW_ALL_ORIGINS = True
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -114,8 +115,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -123,8 +122,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
-
 
 
 STATIC_URL = '/static/'

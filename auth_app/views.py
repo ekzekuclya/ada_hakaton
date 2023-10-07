@@ -152,18 +152,6 @@ class UserPublicationView(viewsets.ModelViewSet):
     serializer_class = UserPublicationSerializer
     permission_classes = [AllowAny]
     queryset = UserPublication.objects.all()
-    # def get_queryset(self):
-    #     user_pk = self.kwargs.get('user_pk')
-    #     event_pk = self.kwargs.get('event_pk')
-    #     print(event_pk)
-    #     if event_pk:
-    #         event = haka_md.Event.objects.get(id=event_pk)
-    #         return UserPublication.objects.filter(event=event)
-    #     if user_pk:
-    #         user_profile = UserProfile.objects.get(user_id=user_pk)
-    #         return UserPublication.objects.filter(user_profile=user_profile)
-    #     else:
-    #         return UserPublication.objects.none()
 
     def perform_create(self, serializer):
         if self.request.user.is_authenticated:

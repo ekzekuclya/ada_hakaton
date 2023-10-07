@@ -1,7 +1,5 @@
 from datetime import timedelta
-
 from celery.utils.time import timezone
-
 from .models import Event
 from .serializers import EventSerializer, MixedScrollList
 from rest_framework import viewsets, filters, response, status, generics
@@ -28,8 +26,6 @@ class EventViewSet(viewsets.ModelViewSet):
                 tags_list.append(tag.id)
             request.data['tags'] = tags_list
         serializer = self.get_serializer(data=request.data)
-        event = serializer.instance
-        notify_event_start.apply_async((), eta=event.start_event_date - timedelta(hours=24))
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
