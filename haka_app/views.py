@@ -10,12 +10,13 @@ from .utils import get_client_ip
 from random import shuffle
 from rest_framework.views import APIView
 from .tasks import notify_event_start
+from rest_framework.permissions import AllowAny
 
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.filter(is_archived=False)
     serializer_class = EventSerializer
-    permission_classes = [DefaultPermission]
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         tags = request.data['tags']
