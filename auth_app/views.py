@@ -48,7 +48,7 @@ class LoginView(generics.GenericAPIView):
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    permission_classes = [UserProfilePermission]
+    # permission_classes = [UserProfilePermission]
 
     @action(detail=True, methods=['POST'], url_path='subscribe')
     def follow(self, request, pk):
