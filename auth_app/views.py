@@ -71,7 +71,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path='subscribe')
     def follow(self, request, pk):
         try:
-            if self.request.user.is_authenticated:
+           
                 current_user = request.user
                 a = UserProfile.objects.get(id=pk)
                 target_user = a.user
@@ -91,7 +91,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
                 current_user_profile.save()
                 target_user_profile.save()
                 return response.Response({"detail": "You subscribed"}, status=status.HTTP_200_OK)
-            return response.Response({"detail": "User не авторизован"}, status=status.HTTP_403_FORBIDDEN)
+
         except UserProfile.DoesNotExist:
             return response.Response({"detail": "UserProfile does not exist"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
