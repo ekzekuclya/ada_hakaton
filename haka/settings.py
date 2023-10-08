@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'haka_app',
     'drf_yasg',
     'django_celery_beat',
-
+    'channels',
 
 
 ]
@@ -63,6 +63,20 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# CHANNEL WEBSOCKET
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            # Укажите настройки для Redis здесь
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
+
+
 
 ROOT_URLCONF = 'haka.urls'
 CORS_ALLOW_ALL_ORIGINS = True

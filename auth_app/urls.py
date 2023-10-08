@@ -5,7 +5,11 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import (
     TokenObtainPairView, TokenRefreshView
 )
+from . import consumers
 
+websocket_urlpatterns = [
+    path("ws/notifications/", consumers.NotificationConsumer.as_asgi()),
+]
 
 router = routers.DefaultRouter()
 router.register('user', UserProfileViewSet, basename='user')

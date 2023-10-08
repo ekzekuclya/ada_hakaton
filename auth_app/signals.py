@@ -1,8 +1,14 @@
 from django.db.models.signals import pre_save, post_save
-from .models import CustomUser, UserProfile, Notifications, UserPublication, Comment
+from .models import CustomUser, UserProfile, Notifications, UserPublication, Comment, AnonymousUser
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from random import choice, randint
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
+channel_layer = get_channel_layer()
+
+
 image_list = ["https://i.pinimg.com/236x/51/91/dc/5191dc77fb76fa9ef4a11eef260b101f.jpg",
               "https://i.pinimg.com/236x/21/fc/fd/21fcfd108a79026900ff6bd8a0563095.jpg",
               "https://i.pinimg.com/236x/c8/73/34/c87334fe49476009f5d367d145c80751.jpg",
@@ -23,6 +29,16 @@ def create_userprofile(sender, instance, created, **kwargs):
         notification = Notifications.objects.create(user=instance, content=text)
         notification.save()
         userprofile.save()
+
+
+# @receiver(post_save, sender=AnonymousUser)
+# def create_userprofile(sender, instance, created, **kwargs):
+#     if created:
+#         userprofile = UserProfile.objects.create(user=instance, img=[choice(image_list) + ", " for i in range(randint(1, 3))]) ## GENERATOR
+#         text = f'С регистрацией {instance.username}!'
+#         notification = Notifications.objects.create(user=instance, content=text)
+#         notification.save()
+#         userprofile.save()
 
 
 @receiver(m2m_changed, sender=UserProfile.followers.through)
@@ -46,6 +62,19 @@ def notification_to_followers(sender, instance, created, **kwargs):
         text = f'Ожидаемый вами ивент опубликовал пост! {instance.description}'
         notification = Notifications.objects.create(user=user, content=text)
         notification.save()
+
+
+@receiver(post_save, sender=Notifications)
+def send_notification(sender, instance, created, **kwargs):
+    if created:
+        group_name = f"user_{instance.user.id}"  # Создайте группу веб-сокета для каждого пользователя
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                "type": "notification.message",
+                "message": instance.content,  # Ваш текст уведомления
+            },
+        )
 
 
 
