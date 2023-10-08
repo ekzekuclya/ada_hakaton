@@ -62,7 +62,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         target_user_profile.save()
         return response.Response({"detail": "You subscribed"}, status=status.HTTP_200_OK)
 
-
     # @action(detail=True, methods=['POST'], url_path='subscribe')
     # def follow(self, request, pk):
     #     current_user = request.user
@@ -85,19 +84,13 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     #     target_user_profile.save()
     #     return response.Response({"detail": "You subscribed"}, status=status.HTTP_200_OK)
 
-
-
     @action(detail=True, methods=['POST'], url_path='unsubscribe')
     def unfollow(self, request, pk):
-        current_user = request.user
-        a = UserProfile.objects.get(id=pk)
-        target_user = a.user
+        target_user_profile = UserProfile.objects.get(id=pk)
+        current_user_profile = UserProfile.objects.get(user=request.user)
 
-        current_user_profile = UserProfile.objects.filter(user=request.user).first()
-        target_user_profile = UserProfile.objects.filter(user=target_user).first()
-
-        current_user_profile.following.remove(target_user)
-        target_user_profile.followers.remove(current_user)
+        current_user_profile.following.remove(target_user_profile.user)
+        target_user_profile.followers.remove(current_user_profile.user)
 
         current_user_profile.save()
         target_user_profile.save()

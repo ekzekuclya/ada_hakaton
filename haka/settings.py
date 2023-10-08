@@ -200,4 +200,6 @@ EMAIL_HOST_USER = 'ekzekuciya07@gmail.com'
 EMAIL_HOST_PASSWORD = 'CRgPSQE2IYfyFdrt'
 
 
+APPEND_SLASH = False
+
 
