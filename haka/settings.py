@@ -77,7 +77,8 @@ MIDDLEWARE = [
 
 
 ROOT_URLCONF = 'haka.urls'
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -158,7 +159,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 100
 }
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Замените на URL вашего фронтенда
+]
 
+# Дополнительные настройки CORS (по желанию)
+CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE']
+CORS_ALLOW_HEADERS = ['Content-Type', 'Authorization']
 
 CELERY_BEAT_SCHEDULE = {
     "notify_event_start": {
