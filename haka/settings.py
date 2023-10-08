@@ -76,8 +76,6 @@ MIDDLEWARE = [
 # }
 
 
-
-
 ROOT_URLCONF = 'haka.urls'
 CORS_ALLOW_ALL_ORIGINS = True
 TEMPLATES = [
