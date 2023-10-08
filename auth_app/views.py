@@ -52,15 +52,11 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'], url_path='subscribe')
     def follow(self, request, pk):
-        current_user = request.user
-        a = UserProfile.objects.get(id=pk)
-        target_user = a.user
+        target_user_profile = UserProfile.objects.get(id=pk)
+        current_user_profile = UserProfile.objects.get(user=request.user)
 
-        current_user_profile = UserProfile.objects.filter(user=request.user).first()
-        target_user_profile = UserProfile.objects.filter(user=target_user).first()
-
-        current_user_profile.following.add(target_user)
-        target_user_profile.followers.add(current_user)
+        current_user_profile.following.add(target_user_profile.user)
+        target_user_profile.followers.add(current_user_profile.user)
 
         current_user_profile.save()
         target_user_profile.save()
