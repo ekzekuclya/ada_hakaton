@@ -89,6 +89,8 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer = EventSerializer(qs, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+
+
     @action(detail=False, methods=['GET'], url_path='week-events')
     def get_city_events(self, request):
         qs = Event.objects.filter(priority='weeks_event')
