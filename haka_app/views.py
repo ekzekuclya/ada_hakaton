@@ -19,7 +19,6 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-
         user = request.user
         request.data['user'] = user
         if 'tags' in request.data:
@@ -83,6 +82,24 @@ class EventViewSet(viewsets.ModelViewSet):
                                          status=status.HTTP_400_BAD_REQUEST)
         else:
             return response.Response({"detail": "Ивент уже набрал людей"}, status=status.HTTP_403_FORBIDDEN)
+
+    @action(detail=False, methods=['GET'], url_path='city-events')
+    def get_city_events(self, request):
+        qs = Event.objects.filter(priority='city_event')
+        serializer = EventSerializer(qs, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path='week-events')
+    def get_city_events(self, request):
+        qs = Event.objects.filter(priority='weeks_event')
+        serializer = EventSerializer(qs, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path='user-events')
+    def get_city_events(self, request):
+        qs = Event.objects.filter(priority='users_event')
+        serializer = EventSerializer(qs, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='subscribers')
     def get_subscribed_followers(self, request, pk):
