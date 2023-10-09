@@ -1,13 +1,14 @@
 from .models import Event
 from rest_framework import serializers
-from auth_app import serializers as sz
+from auth_app import serializers as sz, models as auth_md
+
 
 
 class EventSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source='user.username')
+    user = serializers.StringRelatedField(source='user.username')
     # followers = serializers.StringRelatedField(many=True)
     followers = serializers.SerializerMethodField()
-    tags = serializers.StringRelatedField(many=True)
+    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=auth_md.Tag.objects.all(), required=False)
 
     def get_followers(self, obj):
         followers = obj.followers.all()[:10]
