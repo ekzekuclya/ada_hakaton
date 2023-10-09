@@ -19,8 +19,8 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        user = self.request.user
         tags = request.data['tags']
+        user = request.user
         request.data['user'] = user
         if tags:
             tags_list = []
@@ -29,7 +29,7 @@ class EventViewSet(viewsets.ModelViewSet):
                 tags_list.append(tag.id)
             request.data['tags'] = tags_list
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exceptiojn=True)
+        serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -44,7 +44,7 @@ class EventViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path='follow')
     def follow(self, request, pk):
         event = Event.objects.get(id=pk)
-        while event.limit_of_followers is None or jevent.count_followers() < event.limit_of_followers:
+        while event.limit_of_followers is None or event.count_followers() < event.limit_of_followers:
             if event.can_subscribe == 'all':
                 if request.user.is_authenticated:
                     event.followers.add(request.user)
@@ -52,7 +52,7 @@ class EventViewSet(viewsets.ModelViewSet):
                     return response.Response({"detail": "Вы успешно подписались"}, status=status.HTTP_200_OK)
                 ip_address = get_client_ip(request)
                 session_key = request.session.session_key
-                if session_key:j
+                if session_key:
                     anonymous, created = auth_md.AnonymousUser.objects.get_or_create(ip_address=ip_address)
                     anonymous.session_key = session_key
                     event.anonymous_followers.add(anonymous)
