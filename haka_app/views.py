@@ -19,10 +19,10 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        tags = request.data['tags']
+
         user = request.user
         request.data['user'] = user
-        if tags:
+        if 'tags' in request.data:
             tags_list = []
             for i in request.data['tags']:
                 tag, created = auth_md.Tag.objects.get_or_create(hashtag=i)
