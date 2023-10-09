@@ -18,7 +18,7 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = '__all__'
-        read_only_fields = ('priority', 'user')
+        read_only_fields = ('priority', 'user', 'tags')
 
 
 class MixedScrollList(serializers.ModelSerializer):
