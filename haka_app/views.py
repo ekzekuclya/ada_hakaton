@@ -19,7 +19,9 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        user = self.request.user
         tags = request.data['tags']
+        request.data['user'] = user
         if tags:
             tags_list = []
             for i in request.data['tags']:
@@ -27,7 +29,7 @@ class EventViewSet(viewsets.ModelViewSet):
                 tags_list.append(tag.id)
             request.data['tags'] = tags_list
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid(raise_exceptiojn=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -42,7 +44,7 @@ class EventViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path='follow')
     def follow(self, request, pk):
         event = Event.objects.get(id=pk)
-        while event.limit_of_followers is None or event.count_followers() < event.limit_of_followers:
+        while event.limit_of_followers is None or jevent.count_followers() < event.limit_of_followers:
             if event.can_subscribe == 'all':
                 if request.user.is_authenticated:
                     event.followers.add(request.user)
@@ -50,7 +52,7 @@ class EventViewSet(viewsets.ModelViewSet):
                     return response.Response({"detail": "Вы успешно подписались"}, status=status.HTTP_200_OK)
                 ip_address = get_client_ip(request)
                 session_key = request.session.session_key
-                if session_key:
+                if session_key:j
                     anonymous, created = auth_md.AnonymousUser.objects.get_or_create(ip_address=ip_address)
                     anonymous.session_key = session_key
                     event.anonymous_followers.add(anonymous)
@@ -87,7 +89,6 @@ class EventViewSet(viewsets.ModelViewSet):
         event = Event.objects.get(id=pk)
         subscribers = event.followers.all()
         serializer = auth_sz.LoginSerializer(subscribers, many=True)
-
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='public')
@@ -142,10 +143,13 @@ class EventViewSet(viewsets.ModelViewSet):
                                 user_profile.future_events.remove(event)
                                 user_profile.save()
                             return response.Response(EventSerializer(event).data, status=status.HTTP_200_OK)
-                        return response.Response({"detail": "Указанного юзера нет в ваших ивент подписках"}, status=status.HTTP_400_BAD_REQUEST)
+                        return response.Response({"detail": "Указанного юзера нет в ваших ивент подписках"},
+                                                 status=status.HTTP_400_BAD_REQUEST)
                     return response.Response(EventSerializer(event).data, status=status.HTTP_200_OK)
-                return response.Response({"detail": "Введите id юзеров, которых хотите удалить"}, status=status.HTTP_400_BAD_REQUEST)
-            return response.Response({"detail": "Вы не имеет право редактировать этот Ивент"}, status=status.HTTP_403_FORBIDDEN)
+                return response.Response({"detail": "Введите id юзеров, которых хотите удалить"},
+                                         status=status.HTTP_400_BAD_REQUEST)
+            return response.Response({"detail": "Вы не имеет право редактировать этот Ивент"},
+                                     status=status.HTTP_403_FORBIDDEN)
         return response.Response({"detail": "Ивент не найдет"}, status=status.HTTP_404_NOT_FOUND)
 
 
