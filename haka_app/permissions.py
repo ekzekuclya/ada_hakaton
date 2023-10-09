@@ -10,5 +10,6 @@ class DefaultPermission(permissions.BasePermission):
                 return True
         if view.action == 'follow':
             return True
+        return False
 
 

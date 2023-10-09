@@ -48,12 +48,13 @@ class LoginView(generics.GenericAPIView):
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    # permission_classes = [UserProfilePermission]
+    permission_classes = [UserProfilePermission]
 
     @action(detail=True, methods=['POST'], url_path='subscribe')
     def follow(self, request, pk):
         target_user_profile = UserProfile.objects.get(id=pk)
         current_user_profile = UserProfile.objects.get(user=request.user)
+
 
         current_user_profile.following.add(target_user_profile.user)
         target_user_profile.followers.add(current_user_profile.user)
@@ -72,6 +73,10 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     #     target_user_profile = UserProfile.objects.filter(user=target_user).first()
     #
     #     if not current_user_profile:
+
+
+
+
     #         return response.Response({"detail": "Current user profile not found"}, status=status.HTTP_404_NOT_FOUND)
     #
     #     if not target_user_profile:

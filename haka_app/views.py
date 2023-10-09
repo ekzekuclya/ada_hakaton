@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.filter(is_archived=False)
     serializer_class = EventSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [DefaultPermission]
 
     def create(self, request, *args, **kwargs):
         tags = request.data['tags']
@@ -42,7 +42,9 @@ class EventViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path='follow')
     def follow(self, request, pk):
         event = Event.objects.get(id=pk)
-        while event.limit_of_followers is None or event.count_followers() < event.limit_of_followers:
+        while event.limit_of_follo
+
+wers is None or event.count_followers() < event.limit_of_followers:
             if event.can_subscribe == 'all':
                 if request.user.is_authenticated:
                     event.followers.add(request.user)
