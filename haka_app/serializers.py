@@ -4,7 +4,7 @@ from auth_app import serializers as sz, models as auth_md
 
 
 class EventSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(source='user.username')
+
     # followers = serializers.StringRelatedField(many=True)
     followers = serializers.SerializerMethodField()
     tags = serializers.PrimaryKeyRelatedField(many=True, queryset=auth_md.Tag.objects.all(), required=False)

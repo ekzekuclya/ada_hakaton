@@ -63,32 +63,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         target_user_profile.save()
         return response.Response({"detail": "You subscribed"}, status=status.HTTP_200_OK)
 
-    # @action(detail=True, methods=['POST'], url_path='subscribe')
-    # def follow(self, request, pk):
-    #     current_user = request.user
-    #     a = UserProfile.objects.get(id=pk)
-    #     target_user = a.user
-    #
-    #     current_user_profile = UserProfile.objects.filter(user=request.user).first()
-    #     target_user_profile = UserProfile.objects.filter(user=target_user).first()
-    #
-    #     if not current_user_profile:
-
-
-
-
-    #         return response.Response({"detail": "Current user profile not found"}, status=status.HTTP_404_NOT_FOUND)
-    #
-    #     if not target_user_profile:
-    #         return response.Response({"detail": "Target user profile not found"}, status=status.HTTP_404_NOT_FOUND)
-    #
-    #     current_user_profile.following.add(target_user)
-    #     target_user_profile.followers.add(current_user)
-    #
-    #     current_user_profile.save()
-    #     target_user_profile.save()
-    #     return response.Response({"detail": "You subscribed"}, status=status.HTTP_200_OK)
-
     @action(detail=True, methods=['POST'], url_path='unsubscribe')
     def unfollow(self, request, pk):
         target_user_profile = UserProfile.objects.get(id=pk)
