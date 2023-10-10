@@ -1,9 +1,3 @@
-from .models import UserProfile, UserPublication, CustomUser
-import random
-
-
-def generator():
-    pass
 
 
 def get_client_ip(request):
@@ -13,3 +7,5 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+

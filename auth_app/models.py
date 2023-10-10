@@ -16,7 +16,7 @@ class UserProfile(models.Model):
     following = models.ManyToManyField(CustomUser, 'following', symmetrical=False)
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.CharField(max_length=500, null=True, blank=True)
-    img = models.JSONField(default=[], blank=True, null=True)
+    img = models.CharField(max_length=255)
 
     def __str__(self):
         return self.user.username

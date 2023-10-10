@@ -24,7 +24,7 @@ image_list = ["https://i.pinimg.com/236x/51/91/dc/5191dc77fb76fa9ef4a11eef260b10
 @receiver(post_save, sender=CustomUser)
 def create_userprofile(sender, instance, created, **kwargs):
     if created:
-        userprofile = UserProfile.objects.create(user=instance, img=[choice(image_list) + ", " for i in range(randint(1, 3))]) ## GENERATOR
+        userprofile, created = UserProfile.objects.get_or_create(user=instance)
         text = f'С регистрацией {instance.username}!'
         notification = Notifications.objects.create(user=instance, content=text)
         notification.save()
