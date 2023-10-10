@@ -13,7 +13,7 @@ class RegUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username')
+        fields = ('username', 'password', 'password2', 'email')
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -53,7 +53,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    # user = serializers.CharField(source='user.username')
+    user = serializers.CharField(source='user.username')
     followers = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
 
